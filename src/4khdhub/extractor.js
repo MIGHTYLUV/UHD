@@ -15,14 +15,15 @@ export async function search(title, tmdbId, mediaType) {
         
         let foundUrl = null;
         
+        const { titlesMatch } = await import('../_shared/search.js');
+        
         $('a.movie-card').each((i, el) => {
             const href = $(el).attr('href');
-            if (href) {
-                const targetSuffix = mediaType === 'movie' ? `-movie-${tmdbId}/` : `-series-${tmdbId}/`;
-                if (href.endsWith(targetSuffix) || href.includes(targetSuffix)) {
-                    foundUrl = href;
-                    return false; // break loop
-                }
+            const cardTitle = $(el).find('.movie-card-title, h3, h2').text().trim();
+            
+            if (href && titlesMatch(cardTitle, title)) {
+                foundUrl = href;
+                return false; // break loop
             }
         });
         
@@ -35,7 +36,7 @@ export async function search(title, tmdbId, mediaType) {
             return foundUrl;
         }
         
-        console.log(`[4KHDHub] No matching URL found for TMDB ID: ${tmdbId}`);
+        console.log(`[4KHDHub] No matching URL found for title: ${title}`);
         return null;
     } catch (err) {
         console.error(`[4KHDHub] Search error: ${err.message}`);

@@ -67,9 +67,9 @@ async function findContentUrl(tmdbId, mediaType) {
         let bestScore = 0;
 
         // Look through search result links
-        $('article a[href], .result-item a[href], .search-page a[href]').each((_, el) => {
+        $('article a[href], .result-item a[href], .search-page a[href], a.movie-link, a.movie-card, .movie-grid a').each((_, el) => {
             const href = $(el).attr('href') || '';
-            const title = $(el).text().trim();
+            const title = $(el).find('h3, h2, .title, .movie-card-title').first().text().trim() || $(el).text().trim();
 
             // Check if URL contains TMDB ID
             if (href.includes(`-${tmdbId}`)) {

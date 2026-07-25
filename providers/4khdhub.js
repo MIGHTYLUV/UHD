@@ -1,6 +1,6 @@
 /**
  * 4khdhub - Built from src/4khdhub/
- * Generated: 2026-07-25T16:56:07.634Z
+ * Generated: 2026-07-25T17:20:01.468Z
  */
 var __create = Object.create;
 var __defProp = Object.defineProperty;
@@ -36,6 +36,9 @@ var __objRest = (source, exclude) => {
         target[prop] = source[prop];
     }
   return target;
+};
+var __esm = (fn, res) => function __init() {
+  return fn && (res = (0, fn[__getOwnPropNames(fn)[0]])(fn = 0)), res;
 };
 var __export = (target, all) => {
   for (var name in all)
@@ -78,6 +81,60 @@ var __async = (__this, __arguments, generator) => {
     step((generator = generator.apply(__this, __arguments)).next());
   });
 };
+
+// src/_shared/search.js
+var search_exports = {};
+__export(search_exports, {
+  buildEpisodeId: () => buildEpisodeId,
+  encodeSearchQuery: () => encodeSearchQuery,
+  extractYear: () => extractYear,
+  normalizeTitle: () => normalizeTitle,
+  titlesMatch: () => titlesMatch,
+  yearMatches: () => yearMatches
+});
+function normalizeTitle(title) {
+  return (title || "").toLowerCase().replace(/[''`]/g, "").replace(/[&]/g, "and").replace(/[:–—\-]/g, " ").replace(/[^\w\s]/g, "").replace(/\s+/g, " ").trim();
+}
+function titlesMatch(title1, title2) {
+  const n1 = normalizeTitle(title1);
+  const n2 = normalizeTitle(title2);
+  if (n1 === n2)
+    return true;
+  if (n1.includes(n2) || n2.includes(n1))
+    return true;
+  const words1 = n1.split(" ").filter((w) => w.length > 1);
+  const words2 = n2.split(" ").filter((w) => w.length > 1);
+  const shorter = words1.length <= words2.length ? words1 : words2;
+  const longer = words1.length > words2.length ? words1 : words2;
+  const matchCount = shorter.filter((w) => longer.includes(w)).length;
+  const matchRatio = matchCount / shorter.length;
+  return matchRatio >= 0.8;
+}
+function yearMatches(text, year) {
+  if (!year)
+    return true;
+  return text.includes(year);
+}
+function encodeSearchQuery(query) {
+  return encodeURIComponent(query).replace(/%20/g, "+");
+}
+function buildEpisodeId(season, episode) {
+  if (!season)
+    return "";
+  const s = String(season).padStart(2, "0");
+  if (!episode)
+    return `S${s}`;
+  const e = String(episode).padStart(2, "0");
+  return `S${s}E${e}`;
+}
+function extractYear(title) {
+  const match = (title || "").match(/\b(19|20)\d{2}\b/);
+  return match ? match[0] : null;
+}
+var init_search = __esm({
+  "src/_shared/search.js"() {
+  }
+});
 
 // src/4khdhub/index.js
 var khdhub_exports = {};
@@ -279,14 +336,13 @@ function search(title, tmdbId, mediaType) {
         return null;
       const $ = import_cheerio_without_node_native.default.load(html);
       let foundUrl = null;
+      const { titlesMatch: titlesMatch2 } = yield Promise.resolve().then(() => (init_search(), search_exports));
       $("a.movie-card").each((i, el) => {
         const href = $(el).attr("href");
-        if (href) {
-          const targetSuffix = mediaType === "movie" ? `-movie-${tmdbId}/` : `-series-${tmdbId}/`;
-          if (href.endsWith(targetSuffix) || href.includes(targetSuffix)) {
-            foundUrl = href;
-            return false;
-          }
+        const cardTitle = $(el).find(".movie-card-title, h3, h2").text().trim();
+        if (href && titlesMatch2(cardTitle, title)) {
+          foundUrl = href;
+          return false;
         }
       });
       if (foundUrl) {
@@ -296,7 +352,7 @@ function search(title, tmdbId, mediaType) {
         }
         return foundUrl;
       }
-      console.log(`[4KHDHub] No matching URL found for TMDB ID: ${tmdbId}`);
+      console.log(`[4KHDHub] No matching URL found for title: ${title}`);
       return null;
     } catch (err) {
       console.error(`[4KHDHub] Search error: ${err.message}`);

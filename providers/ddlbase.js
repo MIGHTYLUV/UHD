@@ -1,6 +1,6 @@
 /**
  * ddlbase - Built from src/ddlbase/
- * Generated: 2026-07-25T16:56:07.665Z
+ * Generated: 2026-07-25T17:20:01.501Z
  */
 var __create = Object.create;
 var __defProp = Object.defineProperty;

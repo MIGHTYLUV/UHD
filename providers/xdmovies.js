@@ -1,6 +1,6 @@
 /**
  * xdmovies - Built from src/xdmovies/
- * Generated: 2026-07-25T16:56:07.711Z
+ * Generated: 2026-07-25T17:20:01.564Z
  */
 var __create = Object.create;
 var __defProp = Object.defineProperty;
@@ -323,9 +323,9 @@ function findContentUrl(tmdbId, mediaType) {
       const tmdbInfo = yield getTmdbInfo(tmdbId, mediaType);
       let matchUrl = null;
       let bestScore = 0;
-      $("article a[href], .result-item a[href], .search-page a[href]").each((_, el) => {
+      $("article a[href], .result-item a[href], .search-page a[href], a.movie-link, a.movie-card, .movie-grid a").each((_, el) => {
         const href = $(el).attr("href") || "";
-        const title = $(el).text().trim();
+        const title = $(el).find("h3, h2, .title, .movie-card-title").first().text().trim() || $(el).text().trim();
         if (href.includes(`-${tmdbId}`)) {
           matchUrl = href;
           return false;
